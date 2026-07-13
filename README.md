@@ -1,63 +1,128 @@
-# Libro Ilustrado Interactivo
+# Libro Ilustrado Interactivo 🌙📖
 
-Página web interactiva que simula un libro infantil con sonidos para niños de 1.er y 2.° grado de primaria.
+Página web interactiva para enseñar a niños de 1.er y 2.° grado. Cada página tiene iconos que emiten sonidos al tocarlos.
 
-## Stack Tecnológico
+**Para la Prof. Tatiana Quirós** — Demo listo para presentar.
 
-- **Frontend:** HTML, CSS, JavaScript (vanilla)
-- **Backend:** FastAPI + Python
+---
+
+## Cómo usar (instrucciones rápidas)
+
+### 1. Abre una terminal en la carpeta `backend`
+2. Ejecuta: `python -m pip install -r requirements.txt`
+3. Ejecuta: `python seed.py`
+4. Ejecuta: `python -m uvicorn main:app --reload --port 8000`
+
+### 5. Abre OTRA terminal en la carpeta `frontend`
+6. Ejecuta: `python -m http.server 5500`
+
+### 7. Abre el navegador en: http://localhost:5500
+
+> **Nota:** Necesitas ambas terminales abiertas. Si no escuchas sonidos, haz click en cualquier parte de la página primero (el navegador lo requiere).
+
+---
+
+## Requisitos
+- Python 3.10 o superior
+- Navegador moderno (Chrome, Firefox, Edge, Safari)
+- Dos ventanas de terminal
+
+## Solución de problemas
+
+| Problema | Solución |
+|----------|----------|
+| "Error al cargar" | Verifica que la terminal del backend esté abierta y sin errores |
+| No hay sonido | Haz click en "Abrir el Libro" primero, luego en los iconos |
+| Puerto ocupado | Cambia el puerto con `--port 8001` en uvicorn |
+| `python` no reconocido | Prueba `python3` o `py` |
+
+---
+
+## Stack técnico
+- **Frontend:** HTML + CSS + JavaScript (vanilla)
+- **Backend:** FastAPI + Python 3.10+
 - **Base de datos:** SQLite3
-- **Sonidos:** Web Audio API (generación programática, sin archivos externos)
+- **Sonidos:** Web Audio API (generados programáticamente)
 
-## Historia de Ejemplo
+## API
+- `GET /api/stories` — Lista de historias
+- `GET /api/stories/{id}` — Historia completa
+- `GET /api/health` — Estado del servidor
 
-*La Aventura de Lunita* — una gatita que explora el bosque y encuentra animales. 6 páginas con iconos interactivos que emiten sonidos.
+---
 
-## Inicio Rápido
+## Alcance de esta versión
+Esta es una **demo local** que incluye:
+- ✅ 1 historia: "La Aventura de Lunita" (6 páginas)
+- ✅ Iconos interactivos con sonidos
+- ✅ Navegación con botones y teclado
+- ❌ Sin panel de administración
+- ❌ Sin autenticación
+- ❌ Sin despliegue web
 
-### Backend
+---
 
-```bash
-cd backend
-pip install -r requirements.txt
-python seed.py
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
-```
+## Historia: La Aventura de Lunita
 
-### Frontend
+*Una gatita llamada Lunita explora el bosque y encuentra animales increíbles.*
 
-```bash
-cd frontend
-python -m http.server 5500
-# Abrir http://localhost:5500
-```
+| Página | Contenido | Sonido |
+|--------|-----------|--------|
+| 1 | Portada: Lunita en casa 🌙 | Música suave |
+| 2 | Lunita entra al bosque 🌲 | Pájaro cantando |
+| 3 | Encuentra un río 💧 | Agua fluyendo |
+| 4 | Aparece Búho Sabio 🦉 | Ululato |
+| 5 | Un perro amigable 🐕 | Ladrido |
+| 6 | Lunita regresa a casa 🏠 | Aplausos |
 
-## API Endpoints
+---
 
-| Método | Endpoint | Descripción |
-|--------|----------|-------------|
-| GET | `/api/stories` | Lista de historias |
-| GET | `/api/stories/{id}` | Historia con páginas |
-| GET | `/api/stories/{id}/pages/{num}/sounds` | Sonidos de página |
-| GET | `/api/health` | Estado del servidor |
+## Cómo agregar más historias
 
-## Estructura del Proyecto
+Para agregar una historia diferente, edita el archivo `backend/seed.py`:
+
+1. Crea un nombre único para tu historia
+2. Define las páginas con texto, emoji e iconos
+3. Ejecuta `python seed.py` para insertar los datos
+
+> **Nota:** Esta demo solo incluye una historia a la vez. Para múltiples historias, sería necesario modificar el código del frontend.
+
+---
+
+## Estructura del proyecto
 
 ```
 Libro_ilustrado/
 ├── backend/
-│   ├── main.py          # FastAPI
-│   ├── database.py      # SQLite3
-│   ├── models.py         # Pydantic
-│   ├── seed.py           # Datos ejemplo
-│   └── requirements.txt
+│   ├── main.py              # FastAPI: endpoints REST + CORS
+│   ├── database.py          # SQLite3: conexión y esquema
+│   ├── models.py            # Modelos Pydantic (validación)
+│   ├── seed.py              # Script: poblar DB con historia ejemplo
+│   └── requirements.txt     # fastapi, uvicorn, pydantic
 ├── frontend/
-│   ├── index.html
-│   ├── css/style.css
-│   └── js/app.js
-└── plan.md
+│   ├── index.html           # Interfaz completa del libro
+│   ├── css/
+│   │   └── style.css       # Estilos + animación pasar página
+│   └── js/
+│       └── app.js           # Lógica: API, sonidos, navegación
+├── data/
+│   └── libro.db             # SQLite (autogenerado)
+└── plan.md                  # Documentación del proyecto
 ```
 
-## Para la Prof. Tatiana Quiros
+---
 
-Demo creado según specs. Los sonidos son generados por Web Audio API — no requieren archivos externos. Listo para presentar.
+## Variables de entorno
+
+Esta versión demo no requiere variables de entorno. El patrón para producción sería:
+
+```
+# .env (futuro)
+DATABASE_URL=...
+SECRET_KEY=...
+ALLOWED_ORIGINS=http://localhost:5500,https://tudominio.com
+```
+
+---
+
+**Creado para la Prof. Tatiana Quirós** — Julio 2026

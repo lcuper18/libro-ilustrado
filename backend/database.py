@@ -1,20 +1,25 @@
 """
 database.py - Conexión SQLite3 y helper para queries
 """
+import contextlib
 import sqlite3
 from pathlib import Path
-from typing import Any
+from typing import Any, Generator
 
 DB_PATH = Path(__file__).parent.parent / "data" / "libro.db"
 
 
-def get_connection() -> sqlite3.Connection:
-    """Obtiene conexión a la base de datos con row factory."""
+@contextlib.contextmanager
+def get_connection() -> Generator[sqlite3.Connection, None, None]:
+    """Obtiene conexión a la base de datos con row factory como context manager."""
     DB_PATH.parent.mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON")
-    return conn
+    try:
+        yield conn
+    finally:
+        conn.close()
 
 
 def init_db() -> None:
@@ -54,6 +59,10 @@ def init_db() -> None:
             FOREIGN KEY (page_id) REFERENCES pages(id) ON DELETE CASCADE
         )
     """)
+
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_pages_story_id ON pages(story_id)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_sounds_page_id ON sounds(page_id)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_pages_story_page ON pages(story_id, page_number)")
 
     conn.commit()
     conn.close()

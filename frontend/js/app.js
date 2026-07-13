@@ -189,32 +189,65 @@ function showLoading() { elements.loading.classList.remove('hidden'); }
 function hideLoading() { elements.loading.classList.add('hidden'); }
 
 function renderStoryList(stories) {
-    elements.storyList.innerHTML = stories.map(s => `
-        <li onclick="selectStory(${s.id})">
-            📚 ${s.title}
-            <span class="story-page-count">(${s.page_count} páginas)</span>
-        </li>
-    `).join('');
+    elements.storyList.innerHTML = '';
+    for (const story of stories) {
+        const li = document.createElement('li');
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'story-btn';
+        btn.dataset.storyId = String(story.id);
+        btn.textContent = `📚 ${story.title} (${story.page_count} páginas)`;
+        btn.addEventListener('click', () => selectStory(Number(btn.dataset.storyId)));
+        li.appendChild(btn);
+        elements.storyList.appendChild(li);
+    }
 }
 
 function renderPage(page, pageNum, totalPages) {
-    const soundsHTML = page.sounds.map(sound => `
-        <div class="sound-icon" style="left: ${sound.position_x}%; top: ${sound.position_y}%;"
-             data-sound-type="${sound.sound_type}" title="Toca para escuchar">
-            ${getSoundEmoji(sound.sound_type)}
-        </div>
-    `).join('');
-
-    elements.pageContent.innerHTML = `
-        <div class="page-emoji">${page.image_emoji}</div>
-        <div class="page-text">${page.text}</div>
-        ${soundsHTML}
-    `;
+    elements.pageContent.innerHTML = '';
+    
+    const emoji = document.createElement('div');
+    emoji.className = 'page-emoji';
+    emoji.textContent = page.image_emoji;
+    emoji.setAttribute('role', 'img');
+    emoji.setAttribute('aria-label', `Ilustración de la página ${pageNum}`);
+    
+    const text = document.createElement('p');
+    text.className = 'page-text';
+    text.textContent = page.text;
+    
+    elements.pageContent.appendChild(emoji);
+    elements.pageContent.appendChild(text);
+    
+    // Sonidos
+    for (const sound of (page.sounds || [])) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'sound-icon';
+        btn.dataset.soundType = sound.sound_type;
+        btn.setAttribute('aria-label', `Reproducir sonido: ${sound.sound_type}`);
+        btn.textContent = getSoundEmoji(sound.sound_type);
+        
+        // Posición segura con clamp
+        const x = Math.min(90, Math.max(5, sound.position_x));
+        const y = Math.min(85, Math.max(5, sound.position_y));
+        btn.style.left = `${x}%`;
+        btn.style.top = `${y}%`;
+        
+        btn.addEventListener('click', e => {
+            e.stopPropagation();
+            btn.classList.add('playing');
+            soundGenerator.playSound(btn.dataset.soundType);
+            setTimeout(() => btn.classList.remove('playing'), 1200);
+        });
+        
+        elements.pageContent.appendChild(btn);
+    }
+    
     elements.pageContent.style.backgroundColor = page.background_color;
-    elements.pageIndicator.textContent = `${pageNum} / ${totalPages}`;
+    elements.pageIndicator.textContent = `Página ${pageNum} de ${totalPages}`;
     elements.btnPrev.disabled = pageNum <= 1;
     elements.btnNext.disabled = pageNum >= totalPages;
-    attachSoundListeners();
 }
 
 function getSoundEmoji(type) {
@@ -222,18 +255,55 @@ function getSoundEmoji(type) {
     return map[type] || '🔊';
 }
 
-function attachSoundListeners() {
-    document.querySelectorAll('.sound-icon').forEach(icon => {
-        icon.addEventListener('click', e => {
-            e.stopPropagation();
-            icon.classList.add('playing');
-            soundGenerator.playSound(icon.dataset.soundType);
-            setTimeout(() => icon.classList.remove('playing'), 1000);
-        });
+// ===== NAVEGACIÓN =====
+function waitForAnimation(el) {
+    return new Promise(resolve => {
+        el.addEventListener('animationend', resolve, { once: true });
     });
 }
 
-// ===== NAVEGACIÓN =====
+let navId = 0;
+
+async function goToNextPage() {
+    const currentNavId = ++navId;
+    if (state.currentPage >= state.totalPages || state.isFlipping || !state.currentStory) return;
+    if (currentNavId !== navId) return; // descartar si cambió
+    
+    state.isFlipping = true;
+    
+    elements.pageRight.style.animation = 'flipPageRight 0.4s ease-in forwards';
+    await waitForAnimation(elements.pageRight);
+    
+    state.currentPage++;
+    renderPage(state.currentStory.pages[state.currentPage - 1], state.currentPage, state.totalPages);
+    
+    elements.pageRight.style.animation = 'flipPageIn 0.4s ease-out forwards';
+    await waitForAnimation(elements.pageRight);
+    
+    elements.pageRight.style.animation = '';
+    state.isFlipping = false;
+}
+
+async function goToPrevPage() {
+    const currentNavId = ++navId;
+    if (state.currentPage <= 1 || state.isFlipping || !state.currentStory) return;
+    if (currentNavId !== navId) return; // descartar si cambió
+    
+    state.isFlipping = true;
+    
+    elements.pageRight.style.animation = 'flipPageRight 0.4s ease-in forwards';
+    await waitForAnimation(elements.pageRight);
+    
+    state.currentPage--;
+    renderPage(state.currentStory.pages[state.currentPage - 1], state.currentPage, state.totalPages);
+    
+    elements.pageRight.style.animation = 'flipPageIn 0.4s ease-out forwards';
+    await waitForAnimation(elements.pageRight);
+    
+    elements.pageRight.style.animation = '';
+    state.isFlipping = false;
+}
+
 function selectStory(storyId) {
     showLoading();
     getStory(storyId).then(story => {
@@ -249,36 +319,22 @@ function selectStory(storyId) {
     });
 }
 
-function goToNextPage() {
-    if (state.currentPage >= state.totalPages || state.isFlipping) return;
-    state.isFlipping = true;
-    elements.pageRight.classList.add('flipped');
-    setTimeout(() => {
-        state.currentPage++;
-        renderPage(state.currentStory.pages[state.currentPage - 1], state.currentPage, state.totalPages);
-        elements.pageRight.classList.remove('flipped');
-        state.isFlipping = false;
-    }, 400);
-}
-
-function goToPrevPage() {
-    if (state.currentPage <= 1 || state.isFlipping) return;
-    state.isFlipping = true;
-    elements.pageRight.classList.add('flipped');
-    setTimeout(() => {
-        state.currentPage--;
-        renderPage(state.currentStory.pages[state.currentPage - 1], state.currentPage, state.totalPages);
-        elements.pageRight.classList.remove('flipped');
-        state.isFlipping = false;
-    }, 400);
-}
-
-function openBook() {
+async function openBook() {
     elements.bookCover.classList.add('hidden');
     elements.book.classList.remove('hidden');
     showLoading();
-    getStories().then(renderStoryList).catch(() => selectStory(1));
-    hideLoading();
+    try {
+        const stories = await getStories();
+        if (!stories || stories.length === 0) throw new Error('No hay cuentos');
+        renderStoryList(stories);
+    } catch (err) {
+        console.error(err);
+        // Intentar con ID 1 como fallback
+        try { selectStory(1); } 
+        catch { alert('No se pudo cargar. Asegúrate de que el servidor esté corriendo.'); }
+    } finally {
+        hideLoading();
+    }
 }
 
 function closeBook() {

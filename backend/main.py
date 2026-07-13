@@ -1,26 +1,39 @@
 """
 main.py - FastAPI backend para Libro Ilustrado Interactivo
 """
-from fastapi import FastAPI, HTTPException
+from contextlib import asynccontextmanager
+from fastapi import FastAPI, HTTPException, Path
 from fastapi.middleware.cors import CORSMiddleware
 
 from database import fetch_one, fetch_all, init_db
 from models import StoryListModel, StoryDetailModel, PageModel
 
-app = FastAPI(title="API Libro Ilustrado", description="Backend para libro ilustrado interactivo para niños")
+ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://localhost:5173",
+    "http://localhost:5500",
+]
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    init_db()
+    yield
+
+
+app = FastAPI(
+    title="API Libro Ilustrado",
+    description="Backend para libro ilustrado interactivo para niños",
+    lifespan=lifespan,
+)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET"],
     allow_headers=["*"],
 )
-
-
-@app.on_event("startup")
-def startup_event():
-    init_db()
 
 
 @app.get("/api/stories", response_model=list[StoryListModel])
@@ -36,7 +49,7 @@ def get_stories():
 
 
 @app.get("/api/stories/{story_id}", response_model=StoryDetailModel)
-def get_story(story_id: int):
+def get_story(story_id: int = Path(ge=1)):
     story = fetch_one(
         "SELECT id, title, author, cover_color FROM stories WHERE id = ?",
         (story_id,)
@@ -44,19 +57,31 @@ def get_story(story_id: int):
     if not story:
         raise HTTPException(status_code=404, detail="Historia no encontrada")
 
-    pages_data = fetch_all(
-        "SELECT id, page_number, image_emoji, text, background_color FROM pages WHERE story_id = ? ORDER BY page_number",
-        (story_id,)
-    )
+    rows = fetch_all("""
+        SELECT p.id AS page_id, p.page_number, p.image_emoji, p.text, p.background_color,
+               s.id AS sound_id, s.sound_type, s.position_x, s.position_y
+        FROM pages p
+        LEFT JOIN sounds s ON s.page_id = p.id
+        WHERE p.story_id = ?
+        ORDER BY p.page_number, s.id
+    """, (story_id,))
 
-    pages = []
-    for page in pages_data:
-        sounds = fetch_all(
-            "SELECT id, sound_type, position_x, position_y FROM sounds WHERE page_id = ?",
-            (page["id"],)
-        )
-        pages.append(PageModel(**page, sounds=sounds))
+    pages_map = {}
+    for row in rows:
+        pid = row["page_id"]
+        if pid not in pages_map:
+            pages_map[pid] = {
+                "id": pid, "page_number": row["page_number"],
+                "image_emoji": row["image_emoji"], "text": row["text"],
+                "background_color": row["background_color"], "sounds": []
+            }
+        if row["sound_id"] is not None:
+            pages_map[pid]["sounds"].append({
+                "id": row["sound_id"], "sound_type": row["sound_type"],
+                "position_x": row["position_x"], "position_y": row["position_y"]
+            })
 
+    pages = [PageModel(**p) for p in pages_map.values()]
     return StoryDetailModel(**story, pages=pages)
 
 

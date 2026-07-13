@@ -3,7 +3,7 @@
 > **Cliente:** Prof. Tatiana Quiros
 > **Objetivo:** Demo funcional de libro infantil interactivo con sonidos para enseñanza de 1.º-2.º grado primaria
 > **Stack:** HTML · CSS · JavaScript (vanilla) · FastAPI · Python · SQLite3
-> **Estado:** Planificado
+> **Estado:** MVP implementado
 
 ---
 
@@ -11,7 +11,7 @@
 
 Una aplicación web que simula un libro físico con páginas que se pasan animadamente. Cada página contiene texto e iconos interactivos que reproducen sonidos generados programáticamente (animales, naturaleza, música). Diseñado para niños de 6-8 años: navegación simple, colores vivos, botones grandes.
 
-**Historia de ejemplo:** *La Aventura de Lunita* — una niña que explora el bosque y encuentra animales. 6 páginas con vocabulario sencillo.
+**Historia de ejemplo:** *La Aventura de Lunita* — una gatita que explora el bosque y encuentra animales. 6 páginas con vocabulario sencillo.
 
 ---
 
@@ -114,21 +114,21 @@ Libro_ilustrado/
 ## 7. Fases de Desarrollo
 
 ### Fase 1 — Setup (30 min)
-- [ ] Crear estructura de carpetas
-- [ ] Configurar entorno Python con requirements.txt
-- [ ] Crear base de datos SQLite con esquema
-- [ ] Ejecutar seed.py para poblar datos
+- [x] Crear estructura de carpetas
+- [x] Configurar entorno Python con requirements.txt
+- [x] Crear base de datos SQLite con esquema
+- [x] Ejecutar seed.py para poblar datos
 
 ### Fase 2 — Core Features (60 min)
-- [ ] Implementar endpoints FastAPI (stories, pages, sounds)
-- [ ] Crear frontend HTML/CSS con libro animado
-- [ ] Integrar Web Audio API para sonidos
-- [ ] Conectar frontend con backend via fetch
+- [x] Implementar endpoints FastAPI (stories, pages, sounds)
+- [x] Crear frontend HTML/CSS con libro animado
+- [x] Integrar Web Audio API para sonidos
+- [x] Conectar frontend con backend via fetch
 
 ### Fase 3 — Polish (30 min)
-- [ ] Animación de pasar página (CSS `rotateY`)
-- [ ] Navegación con teclado (← →)
-- [ ] Responsive design para tablets
+- [x] Animación de pasar página (CSS `rotateY`)
+- [x] Navegación con teclado (← →)
+- [x] Responsive design para tablets
 - [ ] Probar con niños reales
 
 ---
@@ -187,3 +187,16 @@ python -m http.server 5500
 | `frontend/js/app.js` | ~400 | Lógica completa |
 
 **Total estimado:** ~1,150 líneas de código
+
+---
+
+## 11. Solución de Problemas
+
+| Problema | Solución |
+|----------|----------|
+| "Error al cargar" en el navegador | Verifica que la terminal del backend esté abierta y sin errores. El backend debe estar corriendo en `localhost:8000`. |
+| No hay sonido al tocar los iconos | Haz click en "Abrir el Libro" primero (necesario para que el navegador active el audio). Luego toca los iconos. |
+| Error "Puerto 8000 en uso" | Detén el proceso que usa el puerto o cambia con `--port 8001` en el comando uvicorn. |
+| `python` no reconocido | Prueba `python3` o `py` en lugar de `python`. |
+| La página no carga (空白) | Verifica que el frontend esté corriendo en `localhost:5500`. Abre http://localhost:5500 (no `localhost:8000`). |
+| Base de datos corrupta | Elimina `data/libro.db` y ejecuta `python seed.py` nuevamente. |

@@ -1,13 +1,22 @@
 """
 models.py - Modelos Pydantic para validación de datos
 """
+from enum import Enum
 from pydantic import BaseModel, Field
-from typing import Optional
+
+
+class SoundType(str, Enum):
+    bird = "bird"
+    water = "water"
+    dog = "dog"
+    owl = "owl"
+    music = "music"
+    applause = "applause"
 
 
 class SoundModel(BaseModel):
     id: int
-    sound_type: str = Field(description="Tipo: bird, water, dog, owl, music, applause")
+    sound_type: SoundType = Field(description="Tipo: bird, water, dog, owl, music, applause")
     position_x: float = Field(ge=0, le=100)
     position_y: float = Field(ge=0, le=100)
 
