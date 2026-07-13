@@ -2,8 +2,10 @@
 main.py - FastAPI backend para Libro Ilustrado Interactivo
 """
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, HTTPException, Path
+from fastapi import FastAPI, HTTPException, Path as FastAPIPath
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+import os
 
 from database import fetch_one, fetch_all, init_db
 from models import StoryListModel, StoryDetailModel, PageModel
@@ -27,6 +29,9 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+static_dir = os.path.join(os.path.dirname(__file__), "..", "frontend", "sounds")
+app.mount("/sounds", StaticFiles(directory=static_dir), name="sounds")
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS,
@@ -49,7 +54,7 @@ def get_stories():
 
 
 @app.get("/api/stories/{story_id}", response_model=StoryDetailModel)
-def get_story(story_id: int = Path(ge=1)):
+def get_story(story_id: int = FastAPIPath(ge=1)):
     story = fetch_one(
         "SELECT id, title, author, cover_color FROM stories WHERE id = ?",
         (story_id,)
@@ -59,7 +64,7 @@ def get_story(story_id: int = Path(ge=1)):
 
     rows = fetch_all("""
         SELECT p.id AS page_id, p.page_number, p.image_emoji, p.text, p.background_color,
-               s.id AS sound_id, s.sound_type, s.position_x, s.position_y
+               s.id AS sound_id, s.sound_type, s.sound_url, s.position_x, s.position_y
         FROM pages p
         LEFT JOIN sounds s ON s.page_id = p.id
         WHERE p.story_id = ?
@@ -78,6 +83,7 @@ def get_story(story_id: int = Path(ge=1)):
         if row["sound_id"] is not None:
             pages_map[pid]["sounds"].append({
                 "id": row["sound_id"], "sound_type": row["sound_type"],
+                "sound_url": row.get("sound_url"),
                 "position_x": row["position_x"], "position_y": row["position_y"]
             })
 
@@ -95,7 +101,7 @@ def get_page_sounds(story_id: int, page_number: int):
         raise HTTPException(status_code=404, detail="Página no encontrada")
 
     sounds = fetch_all(
-        "SELECT id, sound_type, position_x, position_y FROM sounds WHERE page_id = ?",
+        "SELECT id, sound_type, sound_url, position_x, position_y FROM sounds WHERE page_id = ?",
         (page["id"],)
     )
     return sounds

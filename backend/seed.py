@@ -28,42 +28,42 @@ def seed_story():
                 "image_emoji": "🌙",
                 "text": "Había una vez una gatita llamada Lunita que vivía en una casa cerca del bosque. Le gustaba explorar y descubrir cosas nuevas. ¡Esta noche tendrá una aventura especial!",
                 "background_color": "#1a1a2e",
-                "sounds": [{"sound_type": "music", "position_x": 80, "position_y": 20}]
+                "sounds": [{"sound_type": "music", "sound_url": "/sounds/music.mp3", "position_x": 80, "position_y": 8}]
             },
             {
                 "page_number": 2,
                 "image_emoji": "🌲",
                 "text": "Un día, Lunita decidió explorar el bosque. Escuchó un sonido extraño entre los árboles... ¡era un pajarito cantando feliz! 🐦",
                 "background_color": "#2d5a27",
-                "sounds": [{"sound_type": "bird", "position_x": 70, "position_y": 40}]
+                "sounds": [{"sound_type": "bird", "sound_url": "/sounds/bird.mp3", "position_x": 80, "position_y": 8}]
             },
             {
                 "page_number": 3,
                 "image_emoji": "💧",
                 "text": "Lunita siguió caminando y encontró un río cristalino. El agua hacía un sonido muy relajante. ¡Splash splash!",
                 "background_color": "#4a90d9",
-                "sounds": [{"sound_type": "water", "position_x": 50, "position_y": 70}]
+                "sounds": [{"sound_type": "water", "sound_url": "/sounds/agua.mp3", "position_x": 80, "position_y": 8}]
             },
             {
                 "page_number": 4,
                 "image_emoji": "🦉",
                 "text": "De pronto, escuchó un ululato. ¡Era Búho Sabio, el más antiguo del bosque! Su sonido resonaba en los árboles: ¡buuuu, buuuu!",
                 "background_color": "#1e3a5f",
-                "sounds": [{"sound_type": "owl", "position_x": 30, "position_y": 30}]
+                "sounds": [{"sound_type": "owl", "sound_url": "/sounds/owl.mp3", "position_x": 80, "position_y": 8}]
             },
             {
                 "page_number": 5,
                 "image_emoji": "🐕",
                 "text": "Un perro muy amigable apareció corriendo por el bosque. ¡Guau guau! Parece que también estaba explorando y haciendo nuevos amigos.",
                 "background_color": "#8b6914",
-                "sounds": [{"sound_type": "dog", "position_x": 60, "position_y": 50}]
+                "sounds": [{"sound_type": "dog", "sound_url": "/sounds/dog.mp3", "position_x": 80, "position_y": 8}]
             },
             {
                 "page_number": 6,
                 "image_emoji": "🏠",
                 "text": "Lunita regresó a casa feliz con muchas historias que contar. ¡Fin! 🎉 ¡Lunita aprendió que explorar es divertidísimo!",
                 "background_color": "#ffb347",
-                "sounds": [{"sound_type": "applause", "position_x": 50, "position_y": 50}]
+                "sounds": [{"sound_type": "applause", "sound_url": "/sounds/applause.mp3", "position_x": 80, "position_y": 8}]
             }
         ]
 
@@ -76,9 +76,9 @@ def seed_story():
 
             for sound in page["sounds"]:
                 cursor.execute("""
-                    INSERT INTO sounds (page_id, sound_type, position_x, position_y)
-                    VALUES (?, ?, ?, ?)
-                """, (page_id, sound["sound_type"], sound["position_x"], sound["position_y"]))
+                    INSERT INTO sounds (page_id, sound_type, sound_url, position_x, position_y)
+                    VALUES (?, ?, ?, ?, ?)
+                """, (page_id, sound["sound_type"], sound["sound_url"], sound["position_x"], sound["position_y"]))
 
         conn.commit()
         print("Historia 'La Aventura de Lunita' creada exitosamente con 6 páginas!")

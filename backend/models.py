@@ -17,6 +17,7 @@ class SoundType(str, Enum):
 class SoundModel(BaseModel):
     id: int
     sound_type: SoundType = Field(description="Tipo: bird, water, dog, owl, music, applause")
+    sound_url: str | None = Field(default=None, description="URL del archivo de audio")
     position_x: float = Field(ge=0, le=100)
     position_y: float = Field(ge=0, le=100)
 

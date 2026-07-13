@@ -54,6 +54,7 @@ def init_db() -> None:
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 page_id INTEGER NOT NULL,
                 sound_type TEXT NOT NULL,
+                sound_url TEXT DEFAULT NULL,
                 position_x REAL DEFAULT 50,
                 position_y REAL DEFAULT 50,
                 FOREIGN KEY (page_id) REFERENCES pages(id) ON DELETE CASCADE
