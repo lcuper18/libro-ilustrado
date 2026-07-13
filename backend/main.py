@@ -7,8 +7,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 import os
 
-from database import fetch_one, fetch_all, init_db
-from models import StoryListModel, StoryDetailModel, PageModel
+from backend.database import fetch_one, fetch_all, init_db
+from backend.models import StoryListModel, StoryDetailModel, PageModel
 
 ALLOWED_ORIGINS = [
     "http://localhost:3000",

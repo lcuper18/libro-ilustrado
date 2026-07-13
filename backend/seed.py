@@ -1,7 +1,7 @@
 """
 seed.py - Inserta historia de ejemplo "La Aventura de Lunita"
 """
-from database import get_connection, init_db
+from backend.database import get_connection, init_db
 
 
 def seed_story():
