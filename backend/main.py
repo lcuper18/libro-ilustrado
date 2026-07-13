@@ -3,6 +3,7 @@ main.py - FastAPI backend para Libro Ilustrado Interactivo
 """
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, Path as FastAPIPath
+from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 import os
@@ -33,7 +34,14 @@ app = FastAPI(
 frontend_dir = os.path.join(os.path.dirname(__file__), "..", "frontend")
 app.mount("/sounds", StaticFiles(directory=os.path.join(frontend_dir, "sounds")), name="sounds")
 app.mount("/images", StaticFiles(directory=os.path.join(frontend_dir, "images")), name="images")
-app.mount("/", StaticFiles(directory=frontend_dir, html=True), name="frontend")
+app.mount("/static", StaticFiles(directory=frontend_dir), name="frontend")
+
+index_path = os.path.join(frontend_dir, "index.html")
+
+
+@app.get("/", include_in_schema=False)
+def serve_index():
+    return FileResponse(index_path)
 
 app.add_middleware(
     CORSMiddleware,
