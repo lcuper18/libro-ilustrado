@@ -2,7 +2,7 @@
  * app.js - Lógica del libro ilustrado interactivo
  */
 
-const API_BASE = 'http://localhost:8000/api';
+const API_BASE = 'http://localhost:7000/api';
 
 const state = {
     currentStory: null,
