@@ -43,6 +43,7 @@ def init_db() -> None:
                 story_id INTEGER NOT NULL,
                 page_number INTEGER NOT NULL,
                 image_emoji TEXT DEFAULT '📖',
+                image_url TEXT DEFAULT NULL,
                 text TEXT NOT NULL,
                 background_color TEXT DEFAULT '#FFFEF9',
                 FOREIGN KEY (story_id) REFERENCES stories(id) ON DELETE CASCADE

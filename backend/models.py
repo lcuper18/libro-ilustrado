@@ -26,6 +26,7 @@ class PageModel(BaseModel):
     id: int
     page_number: int
     image_emoji: str
+    image_url: str | None = None
     text: str
     background_color: str
     sounds: list[SoundModel] = []

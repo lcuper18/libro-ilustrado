@@ -32,6 +32,9 @@ app = FastAPI(
 static_dir = os.path.join(os.path.dirname(__file__), "..", "frontend", "sounds")
 app.mount("/sounds", StaticFiles(directory=static_dir), name="sounds")
 
+images_dir = os.path.join(os.path.dirname(__file__), "..", "frontend", "images")
+app.mount("/images", StaticFiles(directory=images_dir), name="images")
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS,
@@ -63,7 +66,7 @@ def get_story(story_id: int = FastAPIPath(ge=1)):
         raise HTTPException(status_code=404, detail="Historia no encontrada")
 
     rows = fetch_all("""
-        SELECT p.id AS page_id, p.page_number, p.image_emoji, p.text, p.background_color,
+        SELECT p.id AS page_id, p.page_number, p.image_emoji, p.image_url, p.text, p.background_color,
                s.id AS sound_id, s.sound_type, s.sound_url, s.position_x, s.position_y
         FROM pages p
         LEFT JOIN sounds s ON s.page_id = p.id
@@ -77,8 +80,8 @@ def get_story(story_id: int = FastAPIPath(ge=1)):
         if pid not in pages_map:
             pages_map[pid] = {
                 "id": pid, "page_number": row["page_number"],
-                "image_emoji": row["image_emoji"], "text": row["text"],
-                "background_color": row["background_color"], "sounds": []
+                "image_emoji": row["image_emoji"], "image_url": row["image_url"],
+                "text": row["text"], "background_color": row["background_color"], "sounds": []
             }
         if row["sound_id"] is not None:
             pages_map[pid]["sounds"].append({

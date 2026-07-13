@@ -102,17 +102,26 @@ function calculateSoundPositions(count) {
 function renderPage(page, pageNum, totalPages) {
     elements.pageContent.innerHTML = '';
     elements.pageContent.setAttribute('data-bg', page.background_color);
-    
+
+    if (page.image_url) {
+        const illustration = document.createElement('img');
+        illustration.className = 'page-illustration';
+        illustration.src = page.image_url;
+        illustration.alt = `Ilustración de la página ${pageNum}`;
+        illustration.loading = 'lazy';
+        elements.pageContent.appendChild(illustration);
+    }
+
     const emoji = document.createElement('div');
     emoji.className = 'page-emoji';
     emoji.textContent = page.image_emoji;
     emoji.setAttribute('role', 'img');
     emoji.setAttribute('aria-label', `Ilustración de la página ${pageNum}`);
-    
+
     const text = document.createElement('p');
     text.className = 'page-text';
     text.textContent = page.text;
-    
+
     elements.pageContent.appendChild(emoji);
     elements.pageContent.appendChild(text);
     
