@@ -203,8 +203,32 @@ function renderStoryList(stories) {
     }
 }
 
+function isDarkColor(hex) {
+    if (!hex || !hex.startsWith('#')) return false;
+    const r = parseInt(hex.slice(1, 3), 16) / 255;
+    const g = parseInt(hex.slice(3, 5), 16) / 255;
+    const b = parseInt(hex.slice(5, 7), 16) / 255;
+    const lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    return lum < 0.35;
+}
+
+function calculateSoundPositions(count) {
+    const positions = [];
+    const startX = 80;
+    const startY = 8;
+    const spacingX = 0;
+    const spacingY = 14;
+
+    for (let i = 0; i < count; i++) {
+        positions.push({ x: startX, y: startY + i * spacingY });
+    }
+
+    return positions;
+}
+
 function renderPage(page, pageNum, totalPages) {
     elements.pageContent.innerHTML = '';
+    elements.pageContent.setAttribute('data-bg', page.background_color);
     
     const emoji = document.createElement('div');
     emoji.className = 'page-emoji';
@@ -219,8 +243,13 @@ function renderPage(page, pageNum, totalPages) {
     elements.pageContent.appendChild(emoji);
     elements.pageContent.appendChild(text);
     
-    // Sonidos
-    for (const sound of (page.sounds || [])) {
+    const sounds = page.sounds || [];
+    const positions = calculateSoundPositions(sounds.length);
+    
+    for (let i = 0; i < sounds.length; i++) {
+        const sound = sounds[i];
+        const pos = positions[i] || { x: 50, y: 50 };
+        
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'sound-icon';
@@ -228,9 +257,8 @@ function renderPage(page, pageNum, totalPages) {
         btn.setAttribute('aria-label', `Reproducir sonido: ${sound.sound_type}`);
         btn.textContent = getSoundEmoji(sound.sound_type);
         
-        // Posición segura con clamp
-        const x = Math.min(90, Math.max(5, sound.position_x));
-        const y = Math.min(85, Math.max(5, sound.position_y));
+        const x = Math.min(90, Math.max(5, pos.x));
+        const y = Math.min(85, Math.max(5, pos.y));
         btn.style.left = `${x}%`;
         btn.style.top = `${y}%`;
         
@@ -244,7 +272,6 @@ function renderPage(page, pageNum, totalPages) {
         elements.pageContent.appendChild(btn);
     }
     
-    elements.pageContent.style.backgroundColor = page.background_color;
     elements.pageIndicator.textContent = `Página ${pageNum} de ${totalPages}`;
     elements.btnPrev.disabled = pageNum <= 1;
     elements.btnNext.disabled = pageNum >= totalPages;
