@@ -1,0 +1,9 @@
+services:
+  backend:
+    build: .
+    container_name: libro-ilustrado
+    ports:
+      - "7000:7000"
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped

@@ -14,6 +14,7 @@ ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://localhost:5173",
     "http://localhost:5500",
+    "https://profe-taty.kooperlab.cloud",
 ]
 
 
@@ -29,11 +30,10 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-static_dir = os.path.join(os.path.dirname(__file__), "..", "frontend", "sounds")
-app.mount("/sounds", StaticFiles(directory=static_dir), name="sounds")
-
-images_dir = os.path.join(os.path.dirname(__file__), "..", "frontend", "images")
-app.mount("/images", StaticFiles(directory=images_dir), name="images")
+frontend_dir = os.path.join(os.path.dirname(__file__), "..", "frontend")
+app.mount("/sounds", StaticFiles(directory=os.path.join(frontend_dir, "sounds")), name="sounds")
+app.mount("/images", StaticFiles(directory=os.path.join(frontend_dir, "images")), name="images")
+app.mount("/", StaticFiles(directory=frontend_dir, html=True), name="frontend")
 
 app.add_middleware(
     CORSMiddleware,
