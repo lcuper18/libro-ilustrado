@@ -27,10 +27,21 @@ const elements = {
 
 // ===== AUDIO PLAYER CON ARCHIVOS =====
 class SoundPlayer {
+    constructor() { this.current = null; }
+
     playSound(url) {
         if (!url) return;
-        const audio = new Audio(url);
-        audio.play().catch(err => console.warn('No se pudo reproducir:', url, err));
+        this.stop();
+        this.current = new Audio(url);
+        this.current.play().catch(err => console.warn('No se pudo reproducir:', url, err));
+    }
+
+    stop() {
+        if (this.current) {
+            this.current.pause();
+            this.current.currentTime = 0;
+            this.current = null;
+        }
     }
 }
 
@@ -158,6 +169,7 @@ async function goToNextPage() {
     const currentNavId = ++navId;
     if (state.currentPage >= state.totalPages || state.isFlipping || !state.currentStory) return;
     if (currentNavId !== navId) return; // descartar si cambió
+    soundPlayer.stop();
     
     state.isFlipping = true;
     
@@ -178,6 +190,7 @@ async function goToPrevPage() {
     const currentNavId = ++navId;
     if (state.currentPage <= 1 || state.isFlipping || !state.currentStory) return;
     if (currentNavId !== navId) return; // descartar si cambió
+    soundPlayer.stop();
     
     state.isFlipping = true;
     
@@ -196,6 +209,7 @@ async function goToPrevPage() {
 
 function selectStory(storyId) {
     showLoading();
+    soundPlayer.stop();
     getStory(storyId).then(story => {
         state.currentStory = story;
         state.currentPage = 1;
@@ -228,6 +242,7 @@ async function openBook() {
 }
 
 function closeBook() {
+    soundPlayer.stop();
     elements.book.classList.add('hidden');
     elements.bookCover.classList.remove('hidden');
     state.currentStory = null;
