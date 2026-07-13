@@ -1,8 +1,8 @@
 #!/bin/bash
 set -e
 
-# Seed database if empty
 cd /app
+
 python -c "
 from backend.database import get_connection
 conn = get_connection().__enter__()
@@ -15,7 +15,7 @@ if count == 0:
     sys.exit(1)
 " || {
     echo "Database empty, seeding..."
-    python backend/seed.py
+    python -c "import backend.seed; backend.seed.seed_story()"
 }
 
 exec uvicorn backend.main:app --host 0.0.0.0 --port 7000
