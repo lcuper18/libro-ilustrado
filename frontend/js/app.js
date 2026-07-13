@@ -112,17 +112,10 @@ function renderPage(page, pageNum, totalPages) {
         elements.pageContent.appendChild(illustration);
     }
 
-    const emoji = document.createElement('div');
-    emoji.className = 'page-emoji';
-    emoji.textContent = page.image_emoji;
-    emoji.setAttribute('role', 'img');
-    emoji.setAttribute('aria-label', `Ilustración de la página ${pageNum}`);
-
     const text = document.createElement('p');
     text.className = 'page-text';
     text.textContent = page.text;
 
-    elements.pageContent.appendChild(emoji);
     elements.pageContent.appendChild(text);
     
     const sounds = page.sounds || [];
